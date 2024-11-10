@@ -2,19 +2,29 @@ import cv2
 import os
 import numpy as np
 from scipy.stats import skew, kurtosis
+from glcm import TextureDetector
 
 class Instance:
     def __init__(self, path):
+        #image extraction
         self.path = path
+        self.image = None
+        self.imageBW = None
+        #All following features would be better stored in a dictionary but I'm not going to bother changing it
+        #Image moments
         self.median = None
         self.variance = None
         self.asymmetry = None
         self.kurtosis = None
-        self.image = None
-        self.imageBW = None
+        #glcm  and features
+        self.glcm = None
+        self.contrast = None
+        self.homogeneity = None
+        self.energy = None
+        self.entropy = None
 
     def get_image(self, path):
-        # Load the image using PIL
+        # Load the image using CV
         try:
             self.image = cv2.imread(path, cv2.IMREAD_COLOR)
             self.imageBW = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
@@ -31,16 +41,25 @@ class Instance:
             image_flat = self.imageBW.flatten()
             self.asymmetry = skew(image_flat)
             self.kurtosis = kurtosis(image_flat)
+    
+    def get_glcm_features(self):
+        self.glcm = TextureDetector.calculate_glcm(self.imageBW, distance=1, angle=0)
+        features = TextureDetector.extract_glcm_features(self.glcm)
+        self.contrast = features["contrast"]
+        self.homogeneity = features["homogeneity"]
+        self.energy = features["energy"]
+        self.entropy = features["entropy"]
 
     @classmethod
     def load_images_from_directory(cls, directory_path):
         instances = []
         for filename in os.listdir(directory_path):
-            if filename.endswith(('.jpg', '.png', '.jpeg')):  # You can expand the file types
+            if filename.endswith(('.jpg', '.png', '.jpeg')): 
                 image_path = os.path.join(directory_path, filename)
                 instance = cls(image_path)
-                if instance.get_image():
+                if instance.get_image(image_path):
                     instance.calculate_moments()
+                    instance.get_glcm_features()
                     instances.append(instance)
         return instances
 
