@@ -33,6 +33,15 @@ def plot_features_boxplot(textured_instances, flat_instances):
 
     # Convert data to DataFrame
     df = pd.DataFrame(data)
+    #Record data points to csv
+    df.to_csv("image_features_summary.csv", index=False)
+
+
+    '''#Para Axel
+    latex_table = df.to_latex(index=False)
+    with open("image_features_table.tex", "w") as file:
+        file.write(latex_table)'''
+
 
     # Print median and standard deviation for each feature and dataset
     print("Median and Standard Deviation for each feature by dataset:\n")
