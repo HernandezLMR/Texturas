@@ -30,9 +30,19 @@ def plot_features_boxplot(textured_instances, flat_instances):
             'Asymmetry': instance.asymmetry,
             'Kurtosis': instance.kurtosis
         })
-        
+
     # Convert data to DataFrame
     df = pd.DataFrame(data)
+
+    # Print median and standard deviation for each feature and dataset
+    print("Median and Standard Deviation for each feature by dataset:\n")
+    for feature in df.columns[1:]:  # Skip 'Dataset' column
+        for dataset in ['Textured', 'Flat']:
+            feature_data = df[df['Dataset'] == dataset][feature]
+            median_value = feature_data.median()
+            std_dev = feature_data.std()
+            print(f"{feature} - {dataset}: Median = {median_value:.2f}, Std Dev = {std_dev:.2f}")
+        print()  # Blank line between features for readability
 
     # Set up the matplotlib figure
     plt.figure(figsize=(14, 10))
